@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://robomart-worker.YOUR_SUBDOMAIN.workers.dev/api/:path*"
+    }
+  ]
+}
