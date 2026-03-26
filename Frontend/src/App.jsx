@@ -60,6 +60,13 @@ const MOCK_PRODUCTS = [
 ];
 const CATEGORIES = ["All", "Arms", "Rovers", "Controllers", "Platforms", "Sensors", "Power", "Drones"];
 
+function normalizeProducts(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.products)) return data.products;
+  if (Array.isArray(data?.results)) return data.results;
+  return MOCK_PRODUCTS;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Hooks
 // ─────────────────────────────────────────────────────────────────────────────
@@ -586,7 +593,7 @@ function CartDrawer({ cart, onRemove, onUpdate, total, onClose, onCheckout }) {
 // Seller Dashboard
 // ─────────────────────────────────────────────────────────────────────────────
 function SellerDashboard({ user, products, onAddProduct, onClose }) {
-  const myProducts = products.filter(p => p.seller_id === user.id || p.seller_name === user.name);
+  const myProducts = normalizeProducts(products).filter(p => p.seller_id === user.id || p.seller_name === user.name);
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 900, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "2rem 1rem", overflowY: "auto" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(191,219,254,0.5)", backdropFilter: "blur(10px)" }} />
@@ -668,7 +675,7 @@ export default function App() {
   useEffect(() => {
     setLoading(true);
     apiFetch("/products")
-      .then(data => setProducts(data))
+      .then(data => setProducts(normalizeProducts(data)))
       .catch(() => setProducts(MOCK_PRODUCTS))
       .finally(() => setLoading(false));
   }, []);
@@ -709,11 +716,11 @@ export default function App() {
   };
 
   const handleAddProduct = (p) => {
-    setProducts(prev => [p, ...prev]);
+    setProducts(prev => [p, ...normalizeProducts(prev)]);
     addToast(`"${p.name}" listed successfully!`);
   };
 
-  const filtered = products
+  const filtered = normalizeProducts(products)
     .filter(p => category === "All" || p.category === category)
     .filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.category.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
